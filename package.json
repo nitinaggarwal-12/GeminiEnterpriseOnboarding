@@ -8,12 +8,13 @@
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "start": "vite preview --host 0.0.0.0 --port $PORT"
+    "start": "serve -s dist -l $PORT"
   },
   "dependencies": {
     "lucide-react": "^1.23.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "serve": "^14.2.4",
     "vite": "^8.1.1"
   },
   "devDependencies": {
