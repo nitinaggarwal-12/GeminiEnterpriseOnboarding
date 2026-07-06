@@ -366,6 +366,12 @@ const REAL_ENVIRONMENT_URLS = {
 
 function App() {
   const [activeWorkflowId, setActiveWorkflowId] = useState(null); // null means picker dashboard
+  const isNotebookLM = activeWorkflowId && (
+    activeWorkflowId.includes("8. Onboarding") ||
+    activeWorkflowId.includes("10. Product Discovery") ||
+    activeWorkflowId.includes("12. Grant") ||
+    activeWorkflowId.includes("14. Researcher Literature")
+  );
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [completedWorkflows, setCompletedWorkflows] = useState({});
@@ -730,6 +736,15 @@ Format your output as a JSON object matching this schema:
       "18. Orchestrator Intent Routing Diagnostic": "TEST_ROUTING: Trigger end-to-end latency checks for all active spokes."
     };
     return defaultPrompts[activeWorkflowId] || `Analyze compliance parameters for ${activeWorkflowId}.`;
+  };
+
+  const getNotebookLMSources = () => {
+    if (!activeWorkflowId) return [];
+    if (activeWorkflowId.includes("8. Onboarding")) return ["SOP_902.pdf", "onboarding_manual.pdf"];
+    if (activeWorkflowId.includes("10. Product Discovery")) return ["market_research.pdf", "feature_requests.csv"];
+    if (activeWorkflowId.includes("12. Grant")) return ["past_grants.pdf", "literature_review.pdf"];
+    if (activeWorkflowId.includes("14. Researcher Literature")) return ["patents_collection.pdf", "scientific_literature.pdf"];
+    return [];
   };
 
   const getDynamicOutputText = () => {
@@ -1409,139 +1424,325 @@ Format your output as a JSON object matching this schema:
               </div>
             </div>
 
-            <div className="gemini-mock-chat-body">
-              {currentStepIndex < 2 ? (
-                // Landing view
-                <div className="gemini-landing-prompt-state">
-                  <div className="gemini-welcome-sparkle-row">
-                    <div className="gemini-sparkle-gradient-icon">
-                      <Sparkles size={18} />
-                    </div>
-                    <div>
-                      <div className="gemini-welcome-title-line">Hello, Super</div>
-                      <div className="gemini-welcome-subtitle-line">Let's get some work done!</div>
-                    </div>
-                  </div>
-
-                  {/* Suggested Question Cards Grid */}
-                  <div className="gemini-landing-card-grid">
-                    {getLandingSuggestedCards().map((q, idx) => (
-                      <div 
-                        key={idx}
-                        className="gemini-landing-card"
-                        onClick={() => {
-                          if (currentStepIndex === 1) {
-                            setCustomPrompt(q);
-                          }
-                        }}
-                        style={{
-                          opacity: currentStepIndex === 0 ? 0.5 : 1,
-                          pointerEvents: currentStepIndex === 0 ? 'none' : 'auto',
-                          border: customPrompt === q ? '2px solid #3b82f6' : '1px solid #e2e8f0'
-                        }}
-                      >
-                        <div className="gemini-landing-card-title">{q}</div>
-                        <div className="gemini-landing-card-action">
-                          <span>Pre-fill query</span> ➔
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Prompter Panel */}
-                  <div className={`gemini-prompter-panel ${isPromptFocused ? 'focus' : ''}`}>
-                    <div className="gemini-prompt-input-area-line">
-                      <Shield size={16} className="gemini-shield-verified-icon" />
-                      <textarea 
-                        id="gemini-prompt-textarea"
-                        className={`gemini-input-textarea-element ${currentStep?.targetId === 'gemini-prompt-textarea' ? 'pulsing-focus' : ''}`}
-                        rows={3}
-                        value={getDynamicPrompt()}
-                        onChange={(e) => setCustomPrompt(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            if (currentStepIndex === 1) {
-                              handleNextStep();
-                            }
-                          }
-                        }}
-                        onFocus={() => setIsPromptFocused(true)}
-                        onBlur={() => setIsPromptFocused(false)}
-                        placeholder="Ask anything, search your data, @mention or /tools"
-                      />
-                    </div>
-
-                    <div className="gemini-prompter-toolbar">
-                      <div className="gemini-toolbar-left-group">
-                        <button className="gemini-toolbar-btn" id="gemini-upload-file">
-                          <Plus size={16} />
-                        </button>
-                        <button className="gemini-toolbar-btn">
-                          <Sliders size={16} />
-                        </button>
-                        <button className="gemini-toolbar-btn">
-                          <Database size={16} />
-                        </button>
-                      </div>
+            <div 
+              className="gemini-mock-chat-body"
+              style={{ 
+                padding: isNotebookLM ? 0 : '24px', 
+                display: isNotebookLM ? 'block' : 'flex', 
+                flexDirection: 'column', 
+                justifyContent: isNotebookLM ? 'stretch' : 'center',
+                height: '100%',
+                overflow: 'hidden'
+              }}
+            >
+              {isNotebookLM ? (
+                /* NotebookLM Mock split workspace layout */
+                <div style={{ display: 'flex', width: '100%', height: '100%', overflow: 'hidden' }}>
+                  {/* Sources Left Sidebar */}
+                  <div style={{ width: '250px', borderRight: '1px solid #e2e8f0', backgroundColor: '#f8fafc', display: 'flex', flexDirection: 'column', padding: '16px', flexShrink: 0, textAlign: 'left' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                      <span style={{ fontSize: '0.68rem', fontWeight: '800', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Sources</span>
                       <button 
-                        id="gemini-send-btn"
-                        className={`gemini-send-action-btn ${currentStep?.targetId === 'gemini-send-btn' ? 'pulsing-focus' : ''}`} 
-                        disabled={currentStepIndex < 1}
-                        onClick={() => { if (currentStepIndex === 1) handleNextStep(); }}
+                        style={{ background: '#0284c7', color: 'white', border: 'none', borderRadius: '4px', padding: '4px 8px', fontSize: '0.65rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 'bold' }}
+                        className={currentStepIndex === 0 ? 'pulsing-focus' : ''}
                       >
-                        <Send size={14} style={{ color: 'white' }} />
+                        <Plus size={10} /> Add source
                       </button>
                     </div>
+                    
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px', overflowY: 'auto' }}>
+                      {currentStepIndex === 0 ? (
+                        <div style={{ fontSize: '0.72rem', color: '#64748b', textAlign: 'center', marginTop: '40px', border: '1px dashed #cbd5e1', borderRadius: '6px', padding: '16px 10px', lineHeight: '1.4' }}>
+                          No sources uploaded yet.<br/>Click the pulsing button to initialize.
+                        </div>
+                      ) : (
+                        getNotebookLMSources().map((file, idx) => (
+                          <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', backgroundColor: 'white', borderRadius: '6px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+                            <FileText size={16} style={{ color: '#ef4444' }} />
+                            <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.72rem', fontWeight: '600', color: '#1e293b' }} title={file}>{file}</div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                    
+                    <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '10px', fontSize: '0.65rem', color: '#64748b', display: 'flex', justifyContent: 'space-between', fontWeight: '600' }}>
+                      <span>Source limit</span>
+                      <span>{currentStepIndex === 0 ? '0' : getNotebookLMSources().length} / 100</span>
+                    </div>
+                  </div>
+
+                  {/* Right main workspace panel */}
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', position: 'relative', backgroundColor: 'white' }}>
+                    {currentStepIndex < 2 ? (
+                      /* Welcome landing workspace view */
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px', color: '#1e293b', textAlign: 'center', paddingBottom: '160px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                          <span style={{ fontSize: '1.4rem', fontWeight: '800', background: 'linear-gradient(135deg, #0284c7 0%, #10b981 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NotebookLM</span>
+                          <span style={{ backgroundColor: '#f0f9ff', color: '#0369a1', fontSize: '0.6rem', fontWeight: '700', padding: '2px 6px', borderRadius: '12px', border: '1px solid #bae6fd' }}>Enterprise</span>
+                        </div>
+                        <div style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '8px', color: '#0f172a' }}>Create your first notebook</div>
+                        <div style={{ fontSize: '0.78rem', color: '#475569', maxWidth: '420px', marginBottom: '24px', lineHeight: '1.5' }}>
+                          NotebookLM is an AI-powered research and writing assistant that works best with the sources you upload.
+                        </div>
+                        
+                        <div style={{ display: 'flex', gap: '16px', maxWidth: '640px', width: '100%' }}>
+                          <div style={{ flex: 1, backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', padding: '14px', textAlign: 'left' }}>
+                            <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>Gain new understandings</div>
+                            <div style={{ fontSize: '0.68rem', color: '#64748b', lineHeight: '1.4' }}>Convert complex materials into Q&As, Study Guides, or Briefing Docs.</div>
+                          </div>
+                          <div style={{ flex: 1, backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', padding: '14px', textAlign: 'left' }}>
+                            <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>A chatbot grounded in sources</div>
+                            <div style={{ fontSize: '0.68rem', color: '#64748b', lineHeight: '1.4' }}>Upload your manuals or research and query them securely without leaks.</div>
+                          </div>
+                        </div>
+
+                        {/* Textarea prompter inside landing view */}
+                        <div className={`gemini-prompter-panel ${isPromptFocused ? 'focus' : ''}`} style={{ position: 'absolute', bottom: '20px', left: '20px', right: '20px', border: '1px solid #cbd5e1', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', backgroundColor: 'white', maxWidth: 'none', width: 'auto' }}>
+                          <div className="gemini-prompt-input-area-line">
+                            <Shield size={16} className="gemini-shield-verified-icon" />
+                            <textarea 
+                              id="gemini-prompt-textarea"
+                              className={`gemini-input-textarea-element ${currentStep?.targetId === 'gemini-prompt-textarea' ? 'pulsing-focus' : ''}`}
+                              rows={3}
+                              value={getDynamicPrompt()}
+                              onChange={(e) => setCustomPrompt(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                  e.preventDefault();
+                                  if (currentStepIndex === 1) {
+                                    handleNextStep();
+                                  }
+                                }
+                              }}
+                              onFocus={() => setIsPromptFocused(true)}
+                              onBlur={() => setIsPromptFocused(false)}
+                              placeholder="Ask anything or run prompt..."
+                            />
+                          </div>
+                          <div className="gemini-prompter-toolbar">
+                            <div className="gemini-toolbar-left-group">
+                              <button className="gemini-toolbar-btn" style={{ color: '#475569' }}>
+                                <Plus size={16} />
+                              </button>
+                            </div>
+                            <button 
+                              id="gemini-send-btn"
+                              className={`gemini-send-action-btn ${currentStep?.targetId === 'gemini-send-btn' ? 'pulsing-focus' : ''}`} 
+                              disabled={currentStepIndex < 1}
+                              onClick={() => { if (currentStepIndex === 1) handleNextStep(); }}
+                            >
+                              <Send size={14} style={{ color: 'white' }} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      /* Chat Q&A thread grounded view */
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
+                        <div className="gemini-chat-thread-container" style={{ padding: '20px 40px 100px', display: 'flex', flexDirection: 'column', gap: '24px', overflowY: 'auto', height: '100%', backgroundColor: '#fcfcfd' }}>
+                          {/* User prompt message bubble */}
+                          <div className="gemini-message-bubble user-bubble" style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+                            <div className="gemini-bubble-content" style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '18px', padding: '10px 20px', maxWidth: '70%', color: '#1e3a8a', fontSize: '0.88rem' }}>
+                              <p style={{ margin: 0 }}>{getDynamicPrompt()}</p>
+                            </div>
+                          </div>
+                          
+                          {/* NotebookLM response bubble */}
+                          <div className="gemini-message-bubble assistant-bubble" style={{ display: 'flex', gap: '16px', width: '100%', alignItems: 'flex-start' }}>
+                            <div style={{ width: '32px', height: '32px', fontSize: '0.72rem', flexShrink: 0, backgroundColor: '#0284c7', color: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                              NLM
+                            </div>
+                            <div 
+                              id="gemini-response-bubble" 
+                              className={`gemini-bubble-content ${currentStep?.targetId === 'gemini-response-bubble' ? 'pulsing-focus' : ''}`} 
+                              style={{ 
+                                backgroundColor: 'white', 
+                                border: '1px solid #e2e8f0', 
+                                borderRadius: '12px', 
+                                padding: '20px', 
+                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)', 
+                                flex: 1, 
+                                color: '#334155', 
+                                fontSize: '0.9rem', 
+                                lineHeight: '1.6',
+                                textAlign: 'left'
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight: 'bold', color: '#0369a1', marginBottom: '10px' }}>
+                                <span>📘 Grounded Source Summary</span>
+                              </div>
+                              
+                              <p style={{ whiteSpace: 'pre-wrap', margin: '0 0 16px', color: '#1e293b' }}>
+                                {getDynamicOutputText()}
+                              </p>
+                              
+                              <div style={{ marginTop: '12px', fontSize: '0.72rem', color: '#059669', display: 'flex', gap: '12px', borderTop: '1px solid #f1f5f9', paddingTop: '12px', fontWeight: '600' }}>
+                                <span>✓ Grounding verified from sources ({getNotebookLMSources().join(', ')})</span>
+                                <span>• GxP compliance checked</span>
+                              </div>
+
+                              {/* Suggested follow-ups */}
+                              <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {getSuggestedQuestions().map((q, idx) => (
+                                  <button 
+                                    key={idx}
+                                    className="gemini-follow-up-pill"
+                                    style={{ textAlign: 'left', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', color: '#475569', borderRadius: '8px', padding: '8px 14px', fontSize: '0.78rem', cursor: 'pointer', transition: 'all 0.2s' }}
+                                    onClick={() => {
+                                      setCustomPrompt(q);
+                                      setSimulationDone(false);
+                                      setCurrentStepIndex(1);
+                                    }}
+                                  >
+                                    <CornerDownLeft size={12} className="rotate-arrow-icon" />
+                                    <span>{q}</span>
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : (
-                // Active chat thread response view
-                <div className="gemini-chat-thread-container" style={{ padding: '20px 40px 100px', display: 'flex', flexDirection: 'column', gap: '24px', overflowY: 'auto', height: '100%' }}>
-                  
-                  {/* User Prompt Message Bubble (Clean gray capsule on the right) */}
-                  <div className="gemini-message-bubble user-bubble" style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
-                    <div className="gemini-bubble-content" style={{ backgroundColor: '#f1f5f9', border: 'none', borderRadius: '18px', padding: '10px 20px', maxWidth: '70%', color: '#1e293b', fontSize: '0.9rem', fontWeight: '400' }}>
-                      <p style={{ margin: 0 }}>{getDynamicPrompt()}</p>
-                    </div>
-                  </div>
-                  
-                  {/* Assistant response (Clean, borderless white canvas with left Sparkle icon) */}
-                  <div className="gemini-message-bubble assistant-bubble" style={{ display: 'flex', gap: '16px', width: '100%', alignItems: 'flex-start' }}>
-                    <div className="gemini-sparkle-gradient-icon" style={{ width: '32px', height: '32px', fontSize: '0.8rem', flexShrink: 0, background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)', color: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifySelf: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-                      G
-                    </div>
-                    <div id="gemini-response-bubble" className={`gemini-bubble-content ${currentStep?.targetId === 'gemini-response-bubble' ? 'pulsing-focus' : ''}`} style={{ border: 'none', background: 'none', padding: 0, boxShadow: 'none', flex: 1, color: '#334155', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                      <p style={{ whiteSpace: 'pre-wrap', margin: '0 0 16px' }}>
-                        {getDynamicOutputText()}
-                      </p>
-                      
-                      <div style={{ marginTop: '12px', fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', gap: '12px', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
-                        <span>✓ Grounding check: verified</span>
-                        <span>• Compliance: GxP safe</span>
+                /* Standard Gemini Chat Layout */
+                <>
+                  {currentStepIndex < 2 ? (
+                    // Landing view
+                    <div className="gemini-landing-prompt-state">
+                      <div className="gemini-welcome-sparkle-row">
+                        <div className="gemini-sparkle-gradient-icon">
+                          <Sparkles size={18} />
+                        </div>
+                        <div>
+                          <div className="gemini-welcome-title-line">Hello, Super</div>
+                          <div className="gemini-welcome-subtitle-line">Let's get some work done!</div>
+                        </div>
                       </div>
 
-                      {/* Suggested Follow-up Questions Pills */}
-                      <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {getSuggestedQuestions().map((q, idx) => (
-                          <button 
+                      {/* Suggested Question Cards Grid */}
+                      <div className="gemini-landing-card-grid">
+                        {getLandingSuggestedCards().map((q, idx) => (
+                          <div 
                             key={idx}
-                            className="gemini-follow-up-pill"
+                            className="gemini-landing-card"
                             onClick={() => {
-                              setCustomPrompt(q);
-                              setSimulationDone(false);
-                              setCurrentStepIndex(1);
+                              if (currentStepIndex === 1) {
+                                setCustomPrompt(q);
+                              }
+                            }}
+                            style={{
+                              opacity: currentStepIndex === 0 ? 0.5 : 1,
+                              pointerEvents: currentStepIndex === 0 ? 'none' : 'auto',
+                              border: customPrompt === q ? '2px solid #3b82f6' : '1px solid #e2e8f0'
                             }}
                           >
-                            <CornerDownLeft size={12} className="rotate-arrow-icon" />
-                            <span>{q}</span>
-                          </button>
+                            <div className="gemini-landing-card-title">{q}</div>
+                            <div className="gemini-landing-card-action">
+                              <span>Pre-fill query</span> ➔
+                            </div>
+                          </div>
                         ))}
                       </div>
-                    </div>
-                  </div>
 
-                </div>
+                      {/* Prompter Panel */}
+                      <div className={`gemini-prompter-panel ${isPromptFocused ? 'focus' : ''}`}>
+                        <div className="gemini-prompt-input-area-line">
+                          <Shield size={16} className="gemini-shield-verified-icon" />
+                          <textarea 
+                            id="gemini-prompt-textarea"
+                            className={`gemini-input-textarea-element ${currentStep?.targetId === 'gemini-prompt-textarea' ? 'pulsing-focus' : ''}`}
+                            rows={3}
+                            value={getDynamicPrompt()}
+                            onChange={(e) => setCustomPrompt(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                if (currentStepIndex === 1) {
+                                  handleNextStep();
+                                }
+                              }
+                            }}
+                            onFocus={() => setIsPromptFocused(true)}
+                            onBlur={() => setIsPromptFocused(false)}
+                            placeholder="Ask anything, search your data, @mention or /tools"
+                          />
+                        </div>
+
+                        <div className="gemini-prompter-toolbar">
+                          <div className="gemini-toolbar-left-group">
+                            <button className="gemini-toolbar-btn" id="gemini-upload-file">
+                              <Plus size={16} />
+                            </button>
+                            <button className="gemini-toolbar-btn">
+                              <Sliders size={16} />
+                            </button>
+                            <button className="gemini-toolbar-btn">
+                              <Database size={16} />
+                            </button>
+                          </div>
+                          <button 
+                            id="gemini-send-btn"
+                            className={`gemini-send-action-btn ${currentStep?.targetId === 'gemini-send-btn' ? 'pulsing-focus' : ''}`} 
+                            disabled={currentStepIndex < 1}
+                            onClick={() => { if (currentStepIndex === 1) handleNextStep(); }}
+                          >
+                            <Send size={14} style={{ color: 'white' }} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    // Active chat thread response view
+                    <div className="gemini-chat-thread-container" style={{ padding: '20px 40px 100px', display: 'flex', flexDirection: 'column', gap: '24px', overflowY: 'auto', height: '100%' }}>
+                      
+                      {/* User Prompt Message Bubble (Clean gray capsule on the right) */}
+                      <div className="gemini-message-bubble user-bubble" style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+                        <div className="gemini-bubble-content" style={{ backgroundColor: '#f1f5f9', border: 'none', borderRadius: '18px', padding: '10px 20px', maxWidth: '70%', color: '#1e293b', fontSize: '0.9rem', fontWeight: '400' }}>
+                          <p style={{ margin: 0 }}>{getDynamicPrompt()}</p>
+                        </div>
+                      </div>
+                      
+                      {/* Assistant response (Clean, borderless white canvas with left Sparkle icon) */}
+                      <div className="gemini-message-bubble assistant-bubble" style={{ display: 'flex', gap: '16px', width: '100%', alignItems: 'flex-start' }}>
+                        <div className="gemini-sparkle-gradient-icon" style={{ width: '32px', height: '32px', fontSize: '0.8rem', flexShrink: 0, background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)', color: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifySelf: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                          G
+                        </div>
+                        <div id="gemini-response-bubble" className={`gemini-bubble-content ${currentStep?.targetId === 'gemini-response-bubble' ? 'pulsing-focus' : ''}`} style={{ border: 'none', background: 'none', padding: 0, boxShadow: 'none', flex: 1, color: '#334155', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                          <p style={{ whiteSpace: 'pre-wrap', margin: '0 0 16px' }}>
+                            {getDynamicOutputText()}
+                          </p>
+                          
+                          <div style={{ marginTop: '12px', fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', gap: '12px', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
+                            <span>✓ Grounding check: verified</span>
+                            <span>• Compliance: GxP safe</span>
+                          </div>
+
+                          {/* Suggested Follow-up Questions Pills */}
+                          <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {getSuggestedQuestions().map((q, idx) => (
+                              <button 
+                                key={idx}
+                                className="gemini-follow-up-pill"
+                                onClick={() => {
+                                  setCustomPrompt(q);
+                                  setSimulationDone(false);
+                                  setCurrentStepIndex(1);
+                                }}
+                              >
+                                <CornerDownLeft size={12} className="rotate-arrow-icon" />
+                                <span>{q}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
