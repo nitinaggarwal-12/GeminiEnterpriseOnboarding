@@ -343,6 +343,27 @@ const REAL_WALKTHROUGH_IMAGES = {
   "14. Researcher Literature Review": [uc14_s1, uc14_s2, uc14_s3]
 };
 
+const REAL_ENVIRONMENT_URLS = {
+  "1. Improve Language & Readability": "https://vertexaisearch.cloud.google.com/home/cid/d0f8d75e-4a29-460f-8bcf-6a56d33ede4e?hl=en_US",
+  "2. Consistent Voice Copywriting": "https://vertexaisearch.cloud.google.com/home/cid/d0f8d75e-4a29-460f-8bcf-6a56d33ede4e/r/ideaforge/-?hl=en_US",
+  "3. Document Summarization": "https://vertexaisearch.cloud.google.com/home/cid/d0f8d75e-4a29-460f-8bcf-6a56d33ede4e?hl=en_US",
+  "4. Meeting Minutes Memory": "https://vertexaisearch.cloud.google.com/home/cid/d0f8d75e-4a29-460f-8bcf-6a56d33ede4e?hl=en_US",
+  "5. Digital Marketing & SEO": "https://vertexaisearch.cloud.google.com/home/cid/d0f8d75e-4a29-460f-8bcf-6a56d33ede4e/r/image-and-video?hl=en_US",
+  "6. HR & Recruitment Support": "https://vertexaisearch.cloud.google.com/home/cid/d0f8d75e-4a29-460f-8bcf-6a56d33ede4e?hl=en_US",
+  "7. Expense & Budget Reporting": "https://vertexaisearch.cloud.google.com/home/cid/d0f8d75e-4a29-460f-8bcf-6a56d33ede4e?hl=en_US",
+  "8. Onboarding Repositories": "https://vertexaisearch.cloud.google.com/home/cid/d0f8d75e-4a29-460f-8bcf-6a56d33ede4e/r/notebook?hl=en_US",
+  "9. Localizing Marketing Materials": "https://vertexaisearch.cloud.google.com/home/cid/d0f8d75e-4a29-460f-8bcf-6a56d33ede4e/r/image-and-video?hl=en_US",
+  "10. Product Discovery": "https://vertexaisearch.cloud.google.com/home/cid/d0f8d75e-4a29-460f-8bcf-6a56d33ede4e/r/notebook?hl=en_US",
+  "11. Developer Problem Solving": "https://vertexaisearch.cloud.google.com/home/cid/d0f8d75e-4a29-460f-8bcf-6a56d33ede4e?hl=en_US",
+  "12. Grant & Portfolio Management": "https://vertexaisearch.cloud.google.com/home/cid/d0f8d75e-4a29-460f-8bcf-6a56d33ede4e/r/notebook?hl=en_US",
+  "13. Workflow & Task Automation": "https://vertexaisearch.cloud.google.com/home/cid/d0f8d75e-4a29-460f-8bcf-6a56d33ede4e?hl=en_US",
+  "14. Researcher Literature Review": "https://vertexaisearch.cloud.google.com/home/cid/d0f8d75e-4a29-460f-8bcf-6a56d33ede4e/r/notebook?hl=en_US",
+  "15. ITRMS & EU AI Act Compliance": "https://vertexaisearch.cloud.google.com/home/cid/d0f8d75e-4a29-460f-8bcf-6a56d33ede4e?hl=en_US",
+  "16. Contract Review & Analysis": "https://vertexaisearch.cloud.google.com/home/cid/d0f8d75e-4a29-460f-8bcf-6a56d33ede4e?hl=en_US",
+  "17. Predictive Modeling & EDA": "https://vertexaisearch.cloud.google.com/home/cid/d0f8d75e-4a29-460f-8bcf-6a56d33ede4e?hl=en_US",
+  "18. Orchestrator Intent Routing Diagnostic": "https://vertexaisearch.cloud.google.com/home/cid/d0f8d75e-4a29-460f-8bcf-6a56d33ede4e?hl=en_US"
+};
+
 function App() {
   const [activeWorkflowId, setActiveWorkflowId] = useState(null); // null means picker dashboard
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -1587,6 +1608,27 @@ Format your output as a JSON object matching this schema:
                           <strong style={{ color: '#a7f3d0' }}>💡 Workaround:</strong>
                           <p style={{ color: '#a7f3d0', marginTop: '2px' }}>{activeUseCase["Strategic Workaround"]}</p>
                         </div>
+                        
+                        {/* Real Environment Launch Link */}
+                        {(() => {
+                          const envUrl = REAL_ENVIRONMENT_URLS[activeWorkflowId];
+                          if (envUrl) {
+                            return (
+                              <div style={{ marginTop: '4px', borderTop: '1px dashed rgba(255,255,255,0.08)', paddingTop: '8px' }}>
+                                <a 
+                                  href={envUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#60a5fa', textDecoration: 'underline', fontWeight: '700', fontSize: '0.7rem' }}
+                                >
+                                  <span>🔗 Launch Real Vertex AI Environment</span>
+                                  <ArrowUpRight size={10} />
+                                </a>
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
                         
                         {/* Real Product Walkthrough Screenshot display */}
                         {(() => {
