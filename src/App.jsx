@@ -8,6 +8,24 @@ import {
 } from 'lucide-react';
 import usecasesData from './data/usecases.json';
 
+import uc1_s1 from './assets/real_uc1_step1_navigation.png';
+import uc1_s2 from './assets/real_uc1_step2_configuration.png';
+import uc1_s3 from './assets/real_uc1_step3_execution.png';
+import uc1_s4 from './assets/real_uc1_step4_output.png';
+
+import uc2_s1 from './assets/real_uc2_step1_gem.png';
+import uc2_s2 from './assets/real_uc2_step2_prompt.png';
+import uc2_s3 from './assets/real_uc2_step3_output.png';
+
+import uc8_s1 from './assets/real_uc8_step1_notebooklm.png';
+import uc8_s2 from './assets/real_uc8_step2_upload.png';
+import uc8_s3 from './assets/real_uc8_step3_prompt.png';
+import uc8_s4 from './assets/real_uc8_step4_output.png';
+
+import uc14_s1 from './assets/real_uc14_step1_deepresearch.png';
+import uc14_s2 from './assets/real_uc14_step2_prompt.png';
+import uc14_s3 from './assets/real_uc14_step3_output.png';
+
 // Define simplified 3-step full-screen tour configurations for all 17 workflows
 const TOUR_STEPS = {
   "1. Improve Language & Readability": [
@@ -316,6 +334,13 @@ const TOUR_STEPS = {
       targetId: "gemini-response-bubble"
     }
   ]
+};
+
+const REAL_WALKTHROUGH_IMAGES = {
+  "1. Improve Language & Readability": [uc1_s1, uc1_s2, uc1_s3, uc1_s4],
+  "2. Consistent Voice Copywriting": [uc2_s1, uc2_s2, uc2_s3],
+  "8. Onboarding Repositories": [uc8_s1, uc8_s2, uc8_s3, uc8_s4],
+  "14. Researcher Literature Review": [uc14_s1, uc14_s2, uc14_s3]
 };
 
 function App() {
@@ -1562,6 +1587,30 @@ Format your output as a JSON object matching this schema:
                           <strong style={{ color: '#a7f3d0' }}>💡 Workaround:</strong>
                           <p style={{ color: '#a7f3d0', marginTop: '2px' }}>{activeUseCase["Strategic Workaround"]}</p>
                         </div>
+                        
+                        {/* Real Product Walkthrough Screenshot display */}
+                        {(() => {
+                          const activeWalkthroughList = REAL_WALKTHROUGH_IMAGES[activeWorkflowId] || [];
+                          const currentStepScreenshot = activeWalkthroughList[currentStepIndex];
+                          if (currentStepScreenshot) {
+                            return (
+                              <div style={{ marginTop: '6px', borderTop: '1px dashed rgba(255,255,255,0.08)', paddingTop: '10px' }}>
+                                <strong style={{ color: 'var(--color-secondary)', display: 'block', marginBottom: '6px', fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>📸 Real Product Screenshot:</strong>
+                                <div style={{ borderRadius: '6px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: '#020617', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                  <img 
+                                    src={currentStepScreenshot} 
+                                    alt={`Walkthrough Step ${currentStepIndex + 1}`} 
+                                    style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '180px', objectFit: 'contain' }} 
+                                  />
+                                  <div style={{ padding: '6px 8px', fontSize: '0.62rem', color: 'var(--text-muted)', borderTop: '1px solid rgba(255,255,255,0.06)', width: '100%', textAlign: 'center', backgroundColor: '#0b1329' }}>
+                                    Real application screen for this step
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
                       </div>
                     )}
                   </div>
